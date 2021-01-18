@@ -1,0 +1,98 @@
+#' @title Robust Differential Abundance Test
+#' 
+#' @description \code{rdb} is used to conduct robust differential abundance analysis for compositional data
+#' 
+#' @details This function returns an indicator vector, where each entry correponds to each column. 
+#' 
+#' @import ATE
+#' 
+#' @param P A numerical matrix for compositional data, each row represents a sample (the sume should be 1) and each column represents a component. 
+#' @param Z A binary vector, 1 means treated group and 0 means control group.
+#' @param X A numerical matrix for observed covariates, each row represents a sample and each column represents a covariates.
+#' @param alpha A numerical value, indicating the asymptotical level of FWER. 
+#' 
+#' @return  an indicator vector, where each entry correponds to each column. TRUE means it is differential component
+#' 
+#' @export
+#' 
+#' @examples
+#' m=50
+#' d=100 
+#' P=matrix(runif(m*d),nrow=m,ncol=d)
+#' Z=rep(0,m)
+#' Z[1:(m/2)]=1
+#' rdb(P,Z)
+#' 
+#' @author Shulei Wang
+rdb <- function(P,Z,X=NULL,alpha=0.1)
+{
+  treat=Z==1
+  mtreat=sum(treat)
+  control=Z==0
+  mcontrol=sum(control)
+  d=ncol(P)
+  M=sqrt(2*log(d)/d)
+  D=sqrt(2*log(d)-2*log(alpha))
+  Dpm=D+0.2*M
+  
+  if (is.null(X)) {
+    Ptreat=P[treat,]
+    Pcontrol=P[control,]
+    
+    meantreat=apply(Ptreat, 2, mean)
+    meancontrol=apply(Pcontrol, 2, mean)
+    vartreat=apply(Ptreat, 2, var)
+    varcontrol=apply(Pcontrol, 2, var)
+    
+    Vt=rep(TRUE,d)
+    while (TRUE) {
+      Rtreat=sum(meantreat[Vt])
+      Rcontrol=sum(meancontrol[Vt])
+      tstat=(meantreat/Rtreat-meancontrol/Rcontrol)/sqrt(vartreat/mtreat/Rtreat/Rtreat+varcontrol/mcontrol/Rcontrol/Rcontrol)
+      Mtstat=median(tstat[Vt])
+      if (Mtstat>M) {
+        Wt=Vt&(tstat<(-D))
+      } else if (Mtstat<(-M)) {
+        Wt=Vt&(tstat>D)
+      } else {
+        Wt=Vt&(abs(tstat)>Dpm)
+      }
+      if (sum(Wt)==0){
+        break
+      }
+      Vt[Wt]=FALSE
+    }
+  } else {
+    meanvar=matrix(0,nrow = 5,ncol = d)
+    for (j in 1:d) {
+      tRe=ATE (P[,j], Z, X)
+      meanvar[1:2,j]=tRe$est[1:2]
+      meanvar[3,j]=tRe$vcov[1,1]
+      meanvar[4,j]=tRe$vcov[1,2]
+      meanvar[5,j]=tRe$vcov[2,2]
+    }
+    
+    Vt=rep(TRUE,d)
+    normP=P
+    tR=rep(0,d)
+    while (TRUE) {
+      Rtreat=sum(meanvar[1,Vt])
+      Rcontrol=sum(meanvar[2,Vt])
+      
+      tstat=(meanvar[1,]/Rtreat-meanvar[2,]/Rcontrol)/sqrt(meanvar[3,]/Rtreat/Rtreat-2*meanvar[4,]/Rtreat/Rcontrol+meanvar[5,]/Rcontrol/Rcontrol)
+      Mtstat=median(tstat[Vt])
+      if (Mtstat>M) {
+        Wt=Vt&(tstat<(-D))
+      } else if (Mtstat<(-M)) {
+        Wt=Vt&(tstat>D)
+      } else {
+        Wt=Vt&(abs(tstat)>Dpm)
+      }
+      if (sum(Wt)==0){
+        break
+      }
+      Vt[Wt]=FALSE
+    }
+  }
+  return(!Vt)
+}
