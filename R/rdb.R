@@ -2,16 +2,18 @@
 #' 
 #' @description \code{rdb} is used to conduct robust differential abundance analysis for compositional data
 #' 
-#' @details This function returns an indicator vector, where each entry correponds to each column. 
+#' @details This function returns an indicator vector, where each entry correponds to each component of compoositional data. 
 #' 
 #' @import ATE
+#' @importFrom stats median
+#' @importFrom stats var
 #' 
 #' @param P A numerical matrix for compositional data, each row represents a sample (the sume should be 1) and each column represents a component. 
 #' @param Z A binary vector, 1 means treated group and 0 means control group.
 #' @param X A numerical matrix for observed covariates, each row represents a sample and each column represents a covariates.
 #' @param alpha A numerical value, indicating the asymptotical level of FWER. 
 #' 
-#' @return  an indicator vector, where each entry correponds to each column. TRUE means it is differential component
+#' @return  an indicator vector, where each entry correponds to each column of P. TRUE means it is differential component
 #' 
 #' @export
 #' 
@@ -26,6 +28,21 @@
 #' @author Shulei Wang
 rdb <- function(P,Z,X=NULL,alpha=0.1)
 {
+  if (nrow(P)!=length(Z))
+    stop("Please make sure the number of rows in P equal to the length of Z")
+  if (!all(Z %in% c(0, 1)))
+    stop("Please make sure Z only contain 0 and 1")
+  for (i in 1:nrow(P))
+  {
+    P[i,]=P[i,]/sum(P[i,])
+  }
+  if (!is.null(X))
+  {
+    if (is.vector(X)) X<-matrix(X,ncol=1)
+    if (nrow(P)!=nrow(X))
+      stop("Please make sure the number of rows in P equal to number of rows in X")
+  }
+  
   treat=Z==1
   mtreat=sum(treat)
   control=Z==0

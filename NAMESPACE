@@ -2,3 +2,5 @@
 
 export(rdb)
 import(ATE)
+importFrom(stats,median)
+importFrom(stats,var)

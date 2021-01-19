@@ -16,13 +16,13 @@ rdb(P, Z, X = NULL, alpha = 0.1)
 \item{alpha}{A numerical value, indicating the asymptotical level of FWER.}
 }
 \value{
-an indicator vector, where each entry correponds to each column. TRUE means it is differential component
+an indicator vector, where each entry correponds to each column of P. TRUE means it is differential component
 }
 \description{
 \code{rdb} is used to conduct robust differential abundance analysis for compositional data
 }
 \details{
-This function returns an indicator vector, where each entry correponds to each column.
+This function returns an indicator vector, where each entry correponds to each component of compoositional data.
 }
 \examples{
 m=50
