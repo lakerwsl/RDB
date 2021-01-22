@@ -8,7 +8,7 @@
 #' @importFrom stats median
 #' @importFrom stats var
 #' 
-#' @param P A numerical matrix for compositional data, each row represents a sample (the sume should be 1) and each column represents a component. 
+#' @param P A numerical matrix for compositional data, each row represents a sample (the sum should be 1) and each column represents a component. 
 #' @param Z A binary vector, 1 means treated group and 0 means control group.
 #' @param X A numerical matrix for observed covariates, each row represents a sample and each column represents a covariates.
 #' @param alpha A numerical value, indicating the asymptotical level of FWER. 
