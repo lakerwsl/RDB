@@ -11,7 +11,7 @@ install_github("lakerwsl/RDB")
 Example usage:
 
 ```R
-library(WUNT)
+library(RDB)
 
 m=50
 d=100 
