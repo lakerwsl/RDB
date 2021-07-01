@@ -62,10 +62,18 @@ rdb <- function(P,Z,X=NULL,alpha=0.1)
     varcontrol=apply(Pcontrol, 2, var)
     
     Vt=rep(TRUE,d)
-    while (TRUE) {
+    while (sum(Vt)>0) {
       Rtreat=sum(meantreat[Vt])
       Rcontrol=sum(meancontrol[Vt])
-      tstat=(meantreat/Rtreat-meancontrol/Rcontrol)/sqrt(vartreat/mtreat/Rtreat/Rtreat+varcontrol/mcontrol/Rcontrol/Rcontrol)
+      if (Rtreat<=0 && Rcontrol>0) {
+        tstat=meancontrol/sqrt(varcontrol/mcontrol)
+      } else if (Rtreat>0 && Rcontrol<=0) {
+        tstat=meantreat/sqrt(vartreat/mtreat)
+      } else if (Rtreat>0 && Rcontrol>0) {
+        tstat=(meantreat/Rtreat-meancontrol/Rcontrol)/sqrt(vartreat/mtreat/Rtreat/Rtreat+varcontrol/mcontrol/Rcontrol/Rcontrol)
+      } else {
+        break
+      }
       Mtstat=median(tstat[Vt])
       if (Mtstat>M) {
         Wt=Vt&(tstat<(-D))
@@ -92,11 +100,18 @@ rdb <- function(P,Z,X=NULL,alpha=0.1)
     Vt=rep(TRUE,d)
     normP=P
     tR=rep(0,d)
-    while (TRUE) {
+    while (sum(Vt)>0) {
       Rtreat=sum(meanvar[1,Vt])
       Rcontrol=sum(meanvar[2,Vt])
-      
-      tstat=(meanvar[1,]/Rtreat-meanvar[2,]/Rcontrol)/sqrt(meanvar[3,]/Rtreat/Rtreat-2*meanvar[4,]/Rtreat/Rcontrol+meanvar[5,]/Rcontrol/Rcontrol)
+      if (Rtreat<=0 && Rcontrol>0) {
+        tstat=meanvar[2,]/sqrt(meanvar[5,])
+      } else if (Rtreat>0 && Rcontrol<=0) {
+        tstat=meanvar[1,]/sqrt(meanvar[3,])
+      } else if (Rtreat>0 && Rcontrol>0) {
+        tstat=(meanvar[1,]/Rtreat-meanvar[2,]/Rcontrol)/sqrt(meanvar[3,]/Rtreat/Rtreat-2*meanvar[4,]/Rtreat/Rcontrol+meanvar[5,]/Rcontrol/Rcontrol)
+      } else {
+        break
+      }
       Mtstat=median(tstat[Vt])
       if (Mtstat>M) {
         Wt=Vt&(tstat<(-D))
