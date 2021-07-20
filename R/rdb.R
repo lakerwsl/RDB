@@ -11,9 +11,10 @@
 #' @param P A numerical matrix for compositional data, each row represents a sample (the sum should be 1) and each column represents a component. 
 #' @param Z A binary vector, 1 means treated group and 0 means control group.
 #' @param X A numerical matrix for observed covariates, each row represents a sample and each column represents a covariates.
-#' @param alpha A numerical value, indicating the asymptotical level of FWER. 
+#' @param alpha A numerical value, indicating the significance level of FWER or FDR. 
+#' @param fdr A boolean value, indicating if FDR is the measure of type I error. TRUE means FDR is used and FALSE means FWER is used.
 #' 
-#' @return  an indicator vector, where each entry correponds to each column of P. TRUE means it is differential component
+#' @return  an indicator vector, where each entry correponds to each column of P. TRUE means it is differential component.
 #' 
 #' @export
 #' 
@@ -26,7 +27,7 @@
 #' rdb(P,Z)
 #' 
 #' @author Shulei Wang
-rdb <- function(P,Z,X=NULL,alpha=0.1)
+rdb <- function(P, Z, X=NULL, alpha=0.1, fdr=FALSE)
 {
   if (nrow(P)!=length(Z))
     stop("Please make sure the number of rows in P equal to the length of Z")
@@ -52,43 +53,15 @@ rdb <- function(P,Z,X=NULL,alpha=0.1)
   D=sqrt(2*log(d)-2*log(alpha))
   Dpm=D+0.2*M
   
+  meanvar=matrix(0,nrow = 5,ncol = d)
   if (is.null(X)) {
     Ptreat=P[treat,]
     Pcontrol=P[control,]
-    
-    meantreat=apply(Ptreat, 2, mean)
-    meancontrol=apply(Pcontrol, 2, mean)
-    vartreat=apply(Ptreat, 2, var)
-    varcontrol=apply(Pcontrol, 2, var)
-    
-    Vt=rep(TRUE,d)
-    while (sum(Vt)>0) {
-      Rtreat=sum(meantreat[Vt])
-      Rcontrol=sum(meancontrol[Vt])
-      if (Rtreat<=0 && Rcontrol>0) {
-        tstat=meancontrol/sqrt(varcontrol/mcontrol)
-      } else if (Rtreat>0 && Rcontrol<=0) {
-        tstat=meantreat/sqrt(vartreat/mtreat)
-      } else if (Rtreat>0 && Rcontrol>0) {
-        tstat=(meantreat/Rtreat-meancontrol/Rcontrol)/sqrt(vartreat/mtreat/Rtreat/Rtreat+varcontrol/mcontrol/Rcontrol/Rcontrol)
-      } else {
-        break
-      }
-      Mtstat=median(tstat[Vt])
-      if (Mtstat>M) {
-        Wt=Vt&(tstat<(-D))
-      } else if (Mtstat<(-M)) {
-        Wt=Vt&(tstat>D)
-      } else {
-        Wt=Vt&(abs(tstat)>Dpm)
-      }
-      if (sum(Wt)==0){
-        break
-      }
-      Vt[Wt]=FALSE
-    }
+    meanvar[1,]=apply(Ptreat, 2, mean)
+    meanvar[2,]=apply(Pcontrol, 2, mean)
+    meanvar[3,]=apply(Ptreat, 2, var)
+    meanvar[5,]=apply(Pcontrol, 2, var)
   } else {
-    meanvar=matrix(0,nrow = 5,ncol = d)
     for (j in 1:d) {
       tRe=ATE (P[,j], Z, X)
       meanvar[1:2,j]=tRe$est[1:2]
@@ -96,35 +69,61 @@ rdb <- function(P,Z,X=NULL,alpha=0.1)
       meanvar[4,j]=tRe$vcov[1,2]
       meanvar[5,j]=tRe$vcov[2,2]
     }
-    
-    Vt=rep(TRUE,d)
-    normP=P
-    tR=rep(0,d)
-    while (sum(Vt)>0) {
-      Rtreat=sum(meanvar[1,Vt])
-      Rcontrol=sum(meanvar[2,Vt])
-      if (Rtreat<=0 && Rcontrol>0) {
-        tstat=meanvar[2,]/sqrt(meanvar[5,])
-      } else if (Rtreat>0 && Rcontrol<=0) {
-        tstat=meanvar[1,]/sqrt(meanvar[3,])
-      } else if (Rtreat>0 && Rcontrol>0) {
-        tstat=(meanvar[1,]/Rtreat-meanvar[2,]/Rcontrol)/sqrt(meanvar[3,]/Rtreat/Rtreat-2*meanvar[4,]/Rtreat/Rcontrol+meanvar[5,]/Rcontrol/Rcontrol)
-      } else {
-        break
-      }
-      Mtstat=median(tstat[Vt])
-      if (Mtstat>M) {
-        Wt=Vt&(tstat<(-D))
-      } else if (Mtstat<(-M)) {
-        Wt=Vt&(tstat>D)
-      } else {
-        Wt=Vt&(abs(tstat)>Dpm)
-      }
-      if (sum(Wt)==0){
-        break
-      }
-      Vt[Wt]=FALSE
+  }
+  
+  if (fdr == FALSE)
+  {
+    Vt <- rdb.core(meanvar, M, D, Dpm)
+  } else {
+    Dlist<-seq(0,D,length.out=100)
+    pFDR<-rep(0,length(Dlist))
+    for (j in 1:length(Dlist))
+    {
+      DD = Dlist[j]
+      tVt <- rdb.core(meanvar, M, DD, DD+0.2*M)
+      R=max(1,sum(!tVt))
+      R0=2*d*pnorm(DD,lower.tail =FALSE)
+      pFDR[j]=R0/R
     }
+    if (pFDR[100]<alpha)
+    {
+      FThre <- Dlist[min(which(pFDR<=alpha))]
+    } else {
+      FThre <- Dlist[100]
+    }
+    Vt <- rdb.core(meanvar, M, FThre, FThre+0.2*M)
   }
   return(!Vt)
+}
+
+rdb.core <- function(meanvar, M, D, Dpm)
+{
+  d=ncol(meanvar)
+  Vt=rep(TRUE,d)
+  while (sum(Vt)>0) {
+    Rtreat=sum(meanvar[1,Vt])
+    Rcontrol=sum(meanvar[2,Vt])
+    if (Rtreat<=0 && Rcontrol>0) {
+      tstat=meanvar[2,]/sqrt(meanvar[5,])
+    } else if (Rtreat>0 && Rcontrol<=0) {
+      tstat=meanvar[1,]/sqrt(meanvar[3,])
+    } else if (Rtreat>0 && Rcontrol>0) {
+      tstat=(meanvar[1,]/Rtreat-meanvar[2,]/Rcontrol)/sqrt(meanvar[3,]/Rtreat/Rtreat-2*meanvar[4,]/Rtreat/Rcontrol+meanvar[5,]/Rcontrol/Rcontrol)
+    } else {
+      break
+    }
+    Mtstat=median(tstat[Vt])
+    if (Mtstat>M) {
+      Wt=Vt&(tstat<(-D))
+    } else if (Mtstat<(-M)) {
+      Wt=Vt&(tstat>D)
+    } else {
+      Wt=Vt&(abs(tstat)>Dpm)
+    }
+    if (sum(Wt)==0){
+      break
+    }
+    Vt[Wt]=FALSE
+  }
+  return(Vt)
 }

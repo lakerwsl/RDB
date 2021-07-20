@@ -4,19 +4,21 @@
 \alias{rdb}
 \title{Robust Differential Abundance Test}
 \usage{
-rdb(P, Z, X = NULL, alpha = 0.1)
+rdb(P, Z, X = NULL, alpha = 0.1, fdr = FALSE)
 }
 \arguments{
-\item{P}{A numerical matrix for compositional data, each row represents a sample (the sume should be 1) and each column represents a component.}
+\item{P}{A numerical matrix for compositional data, each row represents a sample (the sum should be 1) and each column represents a component.}
 
 \item{Z}{A binary vector, 1 means treated group and 0 means control group.}
 
 \item{X}{A numerical matrix for observed covariates, each row represents a sample and each column represents a covariates.}
 
-\item{alpha}{A numerical value, indicating the asymptotical level of FWER.}
+\item{alpha}{A numerical value, indicating the significance level of FWER or FDR.}
+
+\item{fdr}{A boolean value, indicating if FDR is the measure of type I error. TRUE means FDR is used and FALSE means FWER is used.}
 }
 \value{
-an indicator vector, where each entry correponds to each column of P. TRUE means it is differential component
+an indicator vector, where each entry correponds to each column of P. TRUE means it is differential component.
 }
 \description{
 \code{rdb} is used to conduct robust differential abundance analysis for compositional data
