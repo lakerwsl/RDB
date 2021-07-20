@@ -59,8 +59,8 @@ rdb <- function(P, Z, X=NULL, alpha=0.1, fdr=FALSE)
     Pcontrol=P[control,]
     meanvar[1,]=apply(Ptreat, 2, mean)
     meanvar[2,]=apply(Pcontrol, 2, mean)
-    meanvar[3,]=apply(Ptreat, 2, var)
-    meanvar[5,]=apply(Pcontrol, 2, var)
+    meanvar[3,]=apply(Ptreat, 2, var)/mtreat
+    meanvar[5,]=apply(Pcontrol, 2, var)/mcontrol
   } else {
     for (j in 1:d) {
       tRe=ATE (P[,j], Z, X)
