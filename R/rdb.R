@@ -44,26 +44,29 @@ rdb <- function(P, Z, X=NULL, alpha=0.1, fdr=FALSE)
       stop("Please make sure the number of rows in P equal to number of rows in X")
   }
   
+  filter=apply(P, 2, sum)>0
+  P.filter=P[,filter]
+  
   treat=Z==1
   mtreat=sum(treat)
   control=Z==0
   mcontrol=sum(control)
-  d=ncol(P)
+  d=ncol(P.filter)
   M=sqrt(2*log(d)/d)
   D=sqrt(2*log(d)-2*log(alpha))
   Dpm=D+0.2*M
   
   meanvar=matrix(0,nrow = 5,ncol = d)
   if (is.null(X)) {
-    Ptreat=P[treat,]
-    Pcontrol=P[control,]
+    Ptreat=P.filter[treat,]
+    Pcontrol=P.filter[control,]
     meanvar[1,]=apply(Ptreat, 2, mean)
     meanvar[2,]=apply(Pcontrol, 2, mean)
     meanvar[3,]=apply(Ptreat, 2, var)/mtreat
     meanvar[5,]=apply(Pcontrol, 2, var)/mcontrol
   } else {
     for (j in 1:d) {
-      tRe=ATE (P[,j], Z, X)
+      tRe=ATE (P.filter[,j], Z, X)
       meanvar[1:2,j]=tRe$est[1:2]
       meanvar[3,j]=tRe$vcov[1,1]
       meanvar[4,j]=tRe$vcov[1,2]
@@ -93,7 +96,11 @@ rdb <- function(P, Z, X=NULL, alpha=0.1, fdr=FALSE)
     }
     Vt <- rdb.core(meanvar, M, FThre, FThre+0.2*M)
   }
-  return(!Vt)
+  
+  ComUt<-rep(FALSE,ncol(P))
+  ComUt[filter]=!Vt
+  
+  return(ComUt)
 }
 
 rdb.core <- function(meanvar, M, D, Dpm)
