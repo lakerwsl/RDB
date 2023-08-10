@@ -6,13 +6,16 @@ Authors@R:
            family = "Wang",
            role = c("aut", "cre"),
            email = "shuleiw@illinois.edu")
+Maintainer: Bo Yuan <boyuan5@illinois.edu>
 Description: RDB package provides an R package for robust differential abundance analysis.
 License: GPL(>=2)
 Imports: ATE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1.9000
+RoxygenNote: 7.2.3
 Suggests: 
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0), dada2, kmer, DECIPHER, graph, Biostrings, stats
 Config/testthat/edition: 3
+Depends: 
+    R (>= 2.10)

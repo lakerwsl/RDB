@@ -4,7 +4,6 @@
 #' 
 #' @details This function returns an indicator vector, where each entry correponds to each component of compoositional data. 
 #' 
-#' @import ATE
 #' @importFrom stats median
 #' @importFrom stats var
 #' 
