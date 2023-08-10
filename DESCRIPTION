@@ -2,11 +2,14 @@ Package: RDB
 Title: Robust Differential Abundance Test in Compositional Data
 Version: 0.0.1
 Authors@R: 
-    person(given = "Shulei",
+    c(person(given = "Shulei",
            family = "Wang",
            role = c("aut", "cre"),
-           email = "shuleiw@illinois.edu")
-Maintainer: Bo Yuan <boyuan5@illinois.edu>
+           email = "shuleiw@illinois.edu"),
+	person(given = "Bo",
+           family = "Yuan",
+           role = c("aut"),
+           email = "boyuan5@illinois.edu"))
 Description: RDB package provides an R package for robust differential abundance analysis.
 License: GPL(>=2)
 Imports: ATE

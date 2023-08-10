@@ -11,5 +11,10 @@ RDB package provides an R package for robust differential abundance analysis.
 \author{
 \strong{Maintainer}: Shulei Wang \email{shuleiw@illinois.edu}
 
+Authors:
+\itemize{
+  \item Bo Yuan \email{boyuan5@illinois.edu}
+}
+
 }
 \keyword{internal}

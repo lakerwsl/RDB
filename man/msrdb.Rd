@@ -16,6 +16,8 @@ msrdb(
 )
 }
 \arguments{
+\item{seqtab}{A numerical matrix for ASV/OTU data, each row represents a sample and each column represents a sequence.}
+
 \item{Z}{A binary vector, 1 means treated group and 0 means control group.}
 
 \item{X}{A numerical matrix for observed covariates, each row represents a sample and each column represents a covariates.}
@@ -29,8 +31,6 @@ msrdb(
 \item{alpha}{A numerical value, indicating the significance level of FWER or FDR.}
 
 \item{fdr}{A boolean value, indicating if FDR is the measure of type I error. TRUE means FDR is used and FALSE means FWER is used.}
-
-\item{P}{A numerical matrix for ASV/OTU data, each row represents a sample and each column represents a sequence.}
 }
 \value{
 A list contains three parts; Sig is an indicator vector, where each entry correponds to each column of P. TRUE means it is differential component; seqdistK is a list containing sequence clustering result; filtering is the sequence matrix after filtering.

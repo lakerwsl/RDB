@@ -10,7 +10,7 @@
 #' @importFrom igraph graph_from_adjacency_matrix
 #‘ @importFrom Biostrings DNAStringSet
 #'
-#' @param P A numerical matrix for ASV/OTU data, each row represents a sample and each column represents a sequence.
+#' @param seqtab A numerical matrix for ASV/OTU data, each row represents a sample and each column represents a sequence.
 #' @param Z A binary vector, 1 means treated group and 0 means control group.
 #' @param X A numerical matrix for observed covariates, each row represents a sample and each column represents a covariates.
 #' @param seqdist A distance matrix that measures the distance between sequences.
