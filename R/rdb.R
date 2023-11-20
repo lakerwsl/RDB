@@ -6,6 +6,7 @@
 #' 
 #' @importFrom stats median
 #' @importFrom stats var
+#' @importFrom ATE ATE
 #' 
 #' @param P A numerical matrix for compositional data, each row represents a sample (the sum should be 1) and each column represents a component. 
 #' @param Z A binary vector, 1 means treated group and 0 means control group.
@@ -28,6 +29,12 @@
 #' @author Shulei Wang
 rdb <- function(P, Z, X=NULL, alpha=0.1, fdr=FALSE)
 {
+    if (!requireNamespace("ATE", quietly = TRUE)) {
+        stop(
+          "Package \"ATE\" must be installed to use this function. To install ATE, please use the command 'devtools::install_github('asadharis/ATE')'",
+          call. = FALSE
+        )
+      }
   if (nrow(P)!=length(Z))
     stop("Please make sure the number of rows in P equal to the length of Z")
   if (!all(Z %in% c(0, 1)))
@@ -65,7 +72,7 @@ rdb <- function(P, Z, X=NULL, alpha=0.1, fdr=FALSE)
     meanvar[5,]=apply(Pcontrol, 2, var)/mcontrol
   } else {
     for (j in 1:d) {
-      tRe=ATE (P.filter[,j], Z, X)
+      tRe= ATE::ATE (P.filter[,j], Z, X)
       meanvar[1:2,j]=tRe$est[1:2]
       meanvar[3,j]=tRe$vcov[1,1]
       meanvar[4,j]=tRe$vcov[1,2]

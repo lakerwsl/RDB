@@ -19,7 +19,7 @@
 #' @param alpha A numerical value, indicating the significance level of FWER or FDR.
 #' @param fdr A boolean value, indicating if FDR is the measure of type I error. TRUE means FDR is used and FALSE means FWER is used.
 #'
-#' @return  A list contains three parts; Sig is an indicator vector, where each entry correponds to each column of P. TRUE means it is differential component; seqdistK is a list containing sequence clustering result; filtering is the sequence matrix after filtering.
+#' @return  A list contains three parts; Sig is an indicator vector, where each entry correponds to each sample. TRUE means it is differential component; seqdistK is a list containing sequence clustering result; filtering is the sequence matrix after filtering.
 #'
 #' @examples
 #' data(vangay)

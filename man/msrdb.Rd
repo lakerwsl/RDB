@@ -33,7 +33,7 @@ msrdb(
 \item{fdr}{A boolean value, indicating if FDR is the measure of type I error. TRUE means FDR is used and FALSE means FWER is used.}
 }
 \value{
-A list contains three parts; Sig is an indicator vector, where each entry correponds to each column of P. TRUE means it is differential component; seqdistK is a list containing sequence clustering result; filtering is the sequence matrix after filtering.
+A list contains three parts; Sig is an indicator vector, where each entry correponds to each sample. TRUE means it is differential component; seqdistK is a list containing sequence clustering result; filtering is the sequence matrix after filtering.
 }
 \description{
 \code{MsRDB} is used to conduct robust differential abundance analysis for ASV/OTU data.

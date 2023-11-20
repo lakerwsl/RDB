@@ -2,6 +2,7 @@
 
 export(msrdb)
 export(rdb)
+importFrom(ATE,ATE)
 importFrom(DECIPHER,DistanceMatrix)
 importFrom(dada2,getSequences)
 importFrom(igraph,graph_from_adjacency_matrix)
